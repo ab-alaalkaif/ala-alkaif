@@ -1,9 +1,9 @@
 <odoo>
     <data>
-        <record model="ir.ui.view" id="view_order_form">
-            <field name="name">view_order_form</field>
-            <field name="inherit_id" ref="sale.view_order_form"/>
-            <field name="model">sale.order</field>
+        <record model="ir.ui.view" id="purchase_order_form">
+            <field name="name">purchase_order_form</field>
+            <field name="inherit_id" ref="purchase.purchase_order_form"/>
+            <field name="model">purchase.order</field>
             <field name="priority">99</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">

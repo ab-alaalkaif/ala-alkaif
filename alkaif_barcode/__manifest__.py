@@ -1,6 +1,6 @@
 {
     'name': 'Alkaif Barcode',
-    'version': '1.0.105',
+    'version': '1.0.106',
     'category': 'Sales',
     'sequence': 1,
     'depends': ['base', 'sale', 'stock', 'account', 'product'],
@@ -15,6 +15,7 @@ Add multiple barcodes per products
         'views/assets.xml',
         'views/product.xml',
         'views/sale_order.xml',
+        'views/purchase_order.xml',
         # 'views/pos_order.xml',
     ],
     'installable': True,
