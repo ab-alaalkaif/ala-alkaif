@@ -9,6 +9,11 @@ class ProductBarcode(models.Model):
 
     name = fields.Char(index=True)
     product_template_id = fields.Many2one('product.template')
-    product_id = fields.Many2one('product.product', related='product_template_id.product_variant_id', store=True)
+    product_id = fields.Many2one('product.product', compute='_compute_product_id', store=True)
     unit_price = fields.Float()
     product_uom_id = fields.Many2one('uom.uom')
+
+    @api.depends('product_template_id')
+    def _compute_product_id(self):
+        for barcode in self:
+            barcode.product_id = barcode.product_template_id.product_variant_id
