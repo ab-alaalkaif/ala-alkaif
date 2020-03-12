@@ -9,6 +9,6 @@ class ProductBarcode(models.Model):
 
     name = fields.Char(index=True)
     product_template_id = fields.Many2one('product.template')
-    product_id = fields.Many2one('product.product', related='product_template_id.product_variant_id')
+    product_id = fields.Many2one('product.product', related='product_template_id.product_variant_id', store=True)
     unit_price = fields.Float()
     product_uom_id = fields.Many2one('uom.uom')
