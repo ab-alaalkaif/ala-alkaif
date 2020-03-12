@@ -1,6 +1,6 @@
 {
     'name': 'Alkaif Barcode',
-    'version': '1.0.111',
+    'version': '1.0.112',
     'category': 'Sales',
     'sequence': 1,
     'depends': ['base', 'sale', 'stock', 'account', 'product'],

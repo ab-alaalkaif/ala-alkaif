@@ -8,6 +8,7 @@ odoo.define('alkaif_barcode.models', function (require) {
     models.load_models([{
         model: 'product.barcode',
         fields: ['name', 'product_uom_id', 'product_id', 'unit_price'],
+        domain: function(self) { return [['available_in_pos','=',true]]; },
         loaded: function (self, barcodes) {
             self.db.add_barcodes(barcodes);
         },
