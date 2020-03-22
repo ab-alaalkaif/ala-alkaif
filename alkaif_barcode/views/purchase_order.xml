@@ -12,9 +12,6 @@
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="_barcode_scanned" widget="barcode_handler" invisible="1"/>
                 </xpath>
-                <xpath expr="//field[@name='currency_id']" position="after">
-                    <field name="barcode_id"/>
-                </xpath>
             </field>
         </record>
     </data>

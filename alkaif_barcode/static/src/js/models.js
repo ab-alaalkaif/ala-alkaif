@@ -8,7 +8,9 @@ odoo.define('alkaif_barcode.models', function (require) {
     models.load_models([{
         model: 'product.barcode',
         fields: ['name', 'product_uom_id', 'product_id', 'unit_price'],
-        domain: function(self) { return [['available_in_pos','=',true]]; },
+        domain: function (self) {
+            return [['available_in_pos', '=', true]];
+        },
         loaded: function (self, barcodes) {
             self.db.add_barcodes(barcodes);
         },
@@ -37,6 +39,22 @@ odoo.define('alkaif_barcode.models', function (require) {
                     merge: false,
                     barcode: parsed_code.base_code
                 });
+            } else if (selectedOrder.pricelist) {
+                const items = selectedOrder.pricelist.items;
+                let found = false;
+                for (var i = 0; i < items.length; i++) {
+                    /*comparing the pricelist items with the selected item*/
+                    if (items[i].barcode_id && items[i].barcode_id[1] === parsed_code.base_code) {
+                        selectedOrder.add_product(product, {
+                            price: items[i].fixed_price,
+                            barcode: parsed_code.base_code
+                        });
+                        found = true;
+                    }
+                }
+                if (!found) {
+                    selectedOrder.add_product(product, {barcode: parsed_code.base_code});
+                }
             } else {
                 selectedOrder.add_product(product, {barcode: parsed_code.base_code});
             }
@@ -121,7 +139,20 @@ odoo.define('alkaif_barcode.models', function (require) {
         set_barcode: function (barcode) {
             this.barcode = barcode;
         },
+    });
 
+    models.Product = models.Product.extend({
+        get_price: function (pricelist, quantity) {
+            const items = pricelist.items;
+            var self = this;
+            console.log(self);
+            for (var i = 0; i < items.length; i++) {
+                if (items[i].barcode_id && items[i].barcode_id[1] === self.barcode) {
+                    return items[i].fixed_price
+                }
+            }
+            return this.constructor.__super__.get_price.apply(this, arguments);
+        },
     });
 
     return models

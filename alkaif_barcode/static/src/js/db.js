@@ -14,6 +14,7 @@ odoo.define('alkaif_barcode.db', function (require) {
                 new_product = Object.assign({}, this.product_by_id[barcode_id.product_id[0]]);
                 new_product.lst_price = barcode_id.unit_price;
                 new_product.uom_id = barcode_id.product_uom_id;
+                new_product.barcode = barcode_id.name;
                 Object.setPrototypeOf(new_product, Object.getPrototypeOf(this.product_by_id[barcode_id.product_id[0]]));
                 this.product_by_barcode[barcode_id.name] = new_product;
             }

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="product_pricelist_item_form_view" model="ir.ui.view">
+            <field name="name">product_pricelist_item_form_view</field>
+            <field name="model">product.pricelist.item</field>
+            <field name="inherit_id" ref="product.product_pricelist_item_form_view"/>
+            <field name="arch" type="xml">
+                <xpath expr="//group/group/field[@name='date_end']" position="after">
+                    <field name="barcode_id"
+                           attrs="{'invisible':[('applied_on','!=','1_product')]}"
+                           domain = "[('product_template_id','=',product_tmpl_id)]"
+                    />
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

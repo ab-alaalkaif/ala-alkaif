@@ -5,15 +5,6 @@ class SaleOrder(models.Model):
     _name = 'sale.order'
     _inherit = ['sale.order', 'barcodes.barcode_events_mixin']
 
-    barcode_id = fields.Many2one('product.barcode', string='Add barcode')
-
-    @api.onchange('barcode_id')
-    def _on_change_barcode(self):
-        for so in self:
-            if so.barcode_id:
-                so.on_barcode_scanned(so.barcode_id.name)
-                so.barcode_id = False
-
     def on_barcode_scanned(self, barcode):
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
@@ -53,3 +44,25 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     barcode_id = fields.Many2one('product.barcode')
+
+    @api.onchange('barcode_id')
+    def _on_change_barcode(self):
+        if self.barcode_id:
+            self.product_id = self.barcode_id.product_id
+
+    def product_id_change(self):
+        res = super().product_id_change()
+        if self.barcode_id:
+            self.update({
+                'price_unit': self.barcode_id.unit_price,
+                'product_uom': self.barcode_id.product_uom_id,
+            })
+        return res
+
+    def product_uom_change(self):
+        super().product_uom_change()
+        if self.barcode_id:
+            self.update({
+                'price_unit': self.barcode_id.unit_price,
+                'product_uom': self.barcode_id.product_uom_id,
+            })
