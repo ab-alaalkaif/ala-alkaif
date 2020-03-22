@@ -8,7 +8,7 @@ odoo.define('alkaif_barcode.db', function (require) {
             for (let i = 0, len = barcode_ids.length; i < len; i++) {
                 let barcode_id = barcode_ids[i];
                 let new_product;
-                if (!!this.product_by_id[barcode_id.product_id[0]]) {
+                if (!this.product_by_id[barcode_id.product_id[0]]) {
                     continue;
                 }
                 new_product = Object.assign({}, this.product_by_id[barcode_id.product_id[0]]);

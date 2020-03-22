@@ -19,7 +19,7 @@ class ProductBarcode(models.Model):
         for barcode in self:
             barcode.product_id = barcode.product_template_id.product_variant_id
 
-    @api.depends('product_template_id.available_in_pos')
+    @api.depends('product_template_id', 'product_template_id.available_in_pos')
     def _compute_available_in_pos(self):
         for barcode in self:
             product_id = barcode.product_template_id.product_variant_id
