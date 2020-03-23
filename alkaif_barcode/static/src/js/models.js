@@ -145,7 +145,6 @@ odoo.define('alkaif_barcode.models', function (require) {
         get_price: function (pricelist, quantity) {
             const items = pricelist.items;
             var self = this;
-            console.log(self);
             for (var i = 0; i < items.length; i++) {
                 if (items[i].barcode_id && items[i].barcode_id[1] === self.barcode) {
                     return items[i].fixed_price
