@@ -25,7 +25,7 @@ class SaleOrder(models.Model):
         else:
             product_id = self.env['product.product'].search([('barcode', '=', barcode)])
             if product_id:
-                sol = self.order_line.filtered(lambda r: r.product_id.id == product_id.id)
+                sol = self.order_line.filtered(lambda r: r.product_id.barcode == barcode)
                 if sol:
                     sol[0].product_uom_qty += 1
                 else:
