@@ -2,7 +2,7 @@ from odoo import api, fields, models, tools, _
 
 
 class StockPicking(models.Model):
-    _name = 'stock.picking'
+    _inherit = 'stock.picking'
 
     def on_barcode_scanned(self, barcode):
         if not self.env.company.nomenclature_id:
