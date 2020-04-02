@@ -12,5 +12,10 @@ class StockMove(models.Model):
             if move.barcode_id:
                 move.price_unit = move.barcode_id.unit_price
                 move.product_uom_qty = 1
-                move.product_uom = move.barcode_id.product_uom_id
                 move.product_id = move.barcode_id.product_id
+
+    @api.onchange('product_id')
+    def onchange_product_id(self):
+        super().onchange_product_id()
+        if self.barcode_id:
+            self.product_uom = self.barcode_id.product_uom_id
