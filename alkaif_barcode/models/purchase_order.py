@@ -32,9 +32,9 @@ class PurchaseOrder(models.Model):
                 taxes_ids = product_id.supplier_taxes_id.filtered(lambda tax: tax.company_id == company_rec).ids
             vals = {
                 'name': product_id.display_name,
-                'price_unit': product_id.list_price,
+                'price_unit': product_id.list_price if not barcode_id else barcode_id.unit_price,
                 'product_id': product_id.id,
-                'product_uom': product_id.uom_id.id,
+                'product_uom': product_id.uom_id.id if not barcode_id else barcode_id.product_uom_id.id,
                 'product_qty': 1.0,
                 'order_id': self.id,
                 'taxes_id': [(6, 0, taxes_ids)],

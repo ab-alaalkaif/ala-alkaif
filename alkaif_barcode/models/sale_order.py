@@ -25,10 +25,10 @@ class SaleOrder(models.Model):
             company_taxes = [tax_rec.id for tax_rec in taxes if tax_rec.company_id.id == company_rec.id]
             vals = {
                 'name': product_id.display_name,
-                'price_unit': product_id.list_price,
+                'price_unit': product_id.list_price if not barcode_id else barcode_id.unit_price,
                 'discount': 0.0,
                 'product_id': product_id.id,
-                'product_uom': product_id.uom_id.id,
+                'product_uom': product_id.uom_id.id if not barcode_id else barcode_id.product_uom_id.id,
                 'product_uom_qty': 1.0,
                 'tax_id': [(6, 0, company_taxes)],
                 'order_id': self.id
