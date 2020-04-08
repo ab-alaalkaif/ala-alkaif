@@ -24,7 +24,7 @@ class PurchaseOrder(models.Model):
             sol[0].product_qty += 1
         else:
             FiscalPosition = self.env['account.fiscal.position']
-            fpos = FiscalPosition.with_context(force_company=self.company_id.id).get_fiscal_position(self.partner.id)
+            fpos = FiscalPosition.with_context(force_company=self.company_id.id).get_fiscal_position(self.partner_id.id)
             fpos = FiscalPosition.browse(fpos)
             if fpos:
                 taxes_ids = fpos.map_tax(product_id.supplier_taxes_id.filtered(lambda tax: tax.company_id == company_rec)).ids
