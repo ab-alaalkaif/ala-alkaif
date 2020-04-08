@@ -37,7 +37,7 @@ class PurchaseOrder(models.Model):
                 'product_uom': product_id.uom_id.id,
                 'product_qty': 1.0,
                 'order_id': self.id,
-                'tax_id': [(6, 0, taxes_ids.ids)],
+                'tax_id': [(6, 0, taxes_ids)],
                 'date_planned': date.today()
             }
             if barcode_id:
