@@ -6,38 +6,38 @@ class SaleOrder(models.Model):
     _inherit = ['sale.order', 'barcodes.barcode_events_mixin']
 
     def on_barcode_scanned(self, barcode):
+        company_rec = self.env['res.company']._find_company_from_partner(self.partner_id.id)
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
             sol = self.order_line.filtered(lambda r: r.barcode_id.id == barcode_id.id)
-            if sol:
-                sol[0].product_uom_qty += 1
-            else:
-                self.order_line.new({
-                    'name': barcode_id.product_id.display_name,
-                    'price_unit': barcode_id.unit_price,
-                    'discount': 0.0,
-                    'product_id': barcode_id.product_id.id,
-                    'product_uom': barcode_id.product_uom_id.id,
-                    'product_uom_qty': 1.0,
-                    'order_id': self.id,
-                    'barcode_id': barcode_id.id
-                })
+            self.create_sale_order_line(company_rec, barcode_id.product_id, sol, barcode_id=barcode_id)
         else:
             product_id = self.env['product.product'].search([('barcode', '=', barcode)])
             if product_id:
                 sol = self.order_line.filtered(lambda r: r.product_id.barcode == barcode)
-                if sol:
-                    sol[0].product_uom_qty += 1
-                else:
-                    self.order_line.new({
-                        'name': product_id.display_name,
-                        'price_unit': product_id.list_price,
-                        'discount': 0.0,
-                        'product_id': product_id.id,
-                        'product_uom': product_id.uom_id.id,
-                        'product_uom_qty': 1.0,
-                        'order_id': self.id
-                    })
+                self.create_sale_order_line(company_rec, product_id, sol)
+
+    def create_sale_order_line(self, company_rec, product_id, sol, barcode_id=False):
+        if sol:
+            sol[0].product_uom_qty += 1
+        else:
+            taxes = product_id.taxes_id
+            company_taxes = [tax_rec for tax_rec in taxes if tax_rec.company_id.id == company_rec.id]
+            vals = {
+                'name': product_id.display_name,
+                'price_unit': product_id.list_price,
+                'discount': 0.0,
+                'product_id': product_id.id,
+                'product_uom': product_id.uom_id.id,
+                'product_uom_qty': 1.0,
+                'tax_id': [(6, 0, company_taxes.ids)],
+                'order_id': self.id
+            }
+            if barcode_id:
+                vals.update({
+                    'barcode_id': barcode_id.id
+                })
+            self.order_line.new(vals)
 
 
 class SaleOrderLine(models.Model):
