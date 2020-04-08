@@ -22,7 +22,7 @@ class SaleOrder(models.Model):
             sol[0].product_uom_qty += 1
         else:
             taxes = product_id.taxes_id
-            company_taxes = [tax_rec for tax_rec in taxes if tax_rec.company_id.id == company_rec.id]
+            company_taxes = [tax_rec.id for tax_rec in taxes if tax_rec.company_id.id == company_rec.id]
             vals = {
                 'name': product_id.display_name,
                 'price_unit': product_id.list_price,
@@ -30,7 +30,7 @@ class SaleOrder(models.Model):
                 'product_id': product_id.id,
                 'product_uom': product_id.uom_id.id,
                 'product_uom_qty': 1.0,
-                'tax_id': [(6, 0, company_taxes.ids)],
+                'tax_id': [(6, 0, company_taxes)],
                 'order_id': self.id
             }
             if barcode_id:
