@@ -6,7 +6,7 @@ class SaleOrder(models.Model):
     _inherit = ['sale.order', 'barcodes.barcode_events_mixin']
 
     def on_barcode_scanned(self, barcode):
-        company_rec = self.env['res.company']._find_company_from_partner(self.partner_id.id)
+        company_rec = self.env.user.company_id
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
             sol = self.order_line.filtered(lambda r: r.barcode_id.id == barcode_id.id)
