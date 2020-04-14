@@ -3,11 +3,12 @@
         <template id="product" inherit_id="website_sale.product">
             <xpath expr="//div[hasclass('css_quantity')]" position="after">
                 <div class="form-group">
-                    <label for="uom_id">Example select</label>
+                    <label for="uom_id">Unit of Measure</label>
                     <select class="form-control" id="uom_id" name="uom_id">
-                        <t t-set="uom_ids" t-value="env['uom.uom'].search([('category_id', '=', product.uom_id.category_id.id)])"/>
-                        <t t-foreach="uom_ids" t-as="uom_id">
-                            <option t-att-value="uom_id.id"><span t-field="uom_id.name"/></option>
+                        <option t-att-value="product.uom_id.id"><span t-field="product.uom_id.name"/></option>
+                        <t t-set="barcode_ids" t-value="env['product.barcode'].search([('product_id', '=', product.id)])"/>
+                        <t t-foreach="barcode_ids" t-as="barcode_id">
+                            <option t-att-value="barcode_id.product_uom_id.id"><span t-field="barcode_id.product_uom_id.name"/> (+ <t t-esc="barcode_id.unit_price - combination_info['price']"/>)</option>
                         </t>
                     </select>
                 </div>

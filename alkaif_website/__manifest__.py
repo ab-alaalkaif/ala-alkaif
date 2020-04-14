@@ -1,6 +1,6 @@
 {
     'name': 'Alkaif Website',
-    'version': '1.0.124',
+    'version': '1.0.125',
     'category': 'Sales',
     'sequence': 1,
     'depends': ['base', 'website', 'website_sale'],
