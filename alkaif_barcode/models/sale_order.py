@@ -10,14 +10,14 @@ class SaleOrder(models.Model):
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
             sol = self.order_line.filtered(lambda r: r.barcode_id.id == barcode_id.id)
-            self.create_sale_order_line(company_rec, barcode_id.product_id, sol, barcode_id=barcode_id)
+            self.create_sale_order_line(company_rec, barcode_id.product_id, sol, barcode, barcode_id=barcode_id)
         else:
             product_id = self.env['product.product'].search([('barcode', '=', barcode)])
             if product_id:
                 sol = self.order_line.filtered(lambda r: r.product_id.barcode == barcode)
-                self.create_sale_order_line(company_rec, product_id, sol)
+                self.create_sale_order_line(company_rec, product_id, sol, barcode)
 
-    def create_sale_order_line(self, company_rec, product_id, sol, barcode_id=False):
+    def create_sale_order_line(self, company_rec, product_id, sol, barcode, barcode_id=False):
         if sol:
             sol[0].product_uom_qty += 1
         else:
@@ -30,6 +30,7 @@ class SaleOrder(models.Model):
                 'product_id': product_id.id,
                 'product_uom': product_id.uom_id.id if not barcode_id else barcode_id.product_uom_id.id,
                 'product_uom_qty': 1.0,
+                'barcode': barcode,
                 'tax_id': [(6, 0, company_taxes)],
                 'order_id': self.id
             }
@@ -44,6 +45,7 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     barcode_id = fields.Many2one('product.barcode')
+    barcode = fields.Char('Barcode used')
 
     @api.onchange('barcode_id')
     def _on_change_barcode(self):
@@ -66,3 +68,11 @@ class SaleOrderLine(models.Model):
                 'price_unit': self.barcode_id.unit_price,
                 'product_uom': self.barcode_id.product_uom_id,
             })
+
+    def _prepare_invoice_line(self):
+        res = super(SaleOrderLine, self)._prepare_invoice_line()
+        if self.barcode:
+            res.update({
+                'barcode': self.barcode,
+            })
+        return res

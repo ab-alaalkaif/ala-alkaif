@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <template id="product" inherit_id="website_sale.product">
+            <xpath expr="//div[hasclass('css_quantity')]" position="after">
+                <div class="form-group">
+                    <label for="uom_id">Example select</label>
+                    <select class="form-control" id="uom_id" name="uom_id">
+                        <t t-set="uom_ids" t-value="env['uom.uom'].search([('category_id', '=', product.uom_id.category_id.id)])"/>
+                        <t t-foreach="uom_ids" t-as="uom_id">
+                            <option t-att-value="uom_id.id"><span t-field="uom_id.name"/></option>
+                        </t>
+                    </select>
+                </div>
+            </xpath>
+        </template>
+    </data>
+</odoo>
