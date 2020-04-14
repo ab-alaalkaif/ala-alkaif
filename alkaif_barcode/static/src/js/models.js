@@ -139,6 +139,11 @@ odoo.define('alkaif_barcode.models', function (require) {
         set_barcode: function (barcode) {
             this.barcode = barcode;
         },
+        export_as_JSON: function () {
+            let result = this.constructor.__super__.export_as_JSON.apply(this, arguments);
+            result.product_uom_id = this.get_product().uom_id[0];
+            return result;
+        },
     });
 
     models.Product = models.Product.extend({
