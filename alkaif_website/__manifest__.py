@@ -1,6 +1,6 @@
 {
     'name': 'Alkaif Website',
-    'version': '1.0.125',
+    'version': '1.0.126',
     'category': 'Sales',
     'sequence': 1,
     'depends': ['base', 'website', 'website_sale'],
@@ -9,8 +9,7 @@ Alkaif Website
     """,
     'data': [
         # views
-        'views/website_product.xml',
-        'views/cart.xml',
+
     ],
     'installable': True,
     'auto_install': False,
