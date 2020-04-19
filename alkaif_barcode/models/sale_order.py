@@ -40,6 +40,13 @@ class SaleOrder(models.Model):
                 })
             self.order_line.new(vals)
 
+    def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):
+        res = super(SaleOrder, self)._cart_update(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs)
+        sale_line_id = self.env['sale.order.line'].browse(res.get('line_id'))
+        if sale_line_id.exists() and sale_line_id.barcode_id:
+            sale_line_id.price_unit = sale_line_id.barcode_id.unit_price
+        return res
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
