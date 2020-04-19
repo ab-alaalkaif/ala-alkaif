@@ -11,5 +11,5 @@ class WebsiteSaleCustom(WebsiteSale):
         if not request.website.warehouse_id:
             return domain
         product_ids = request.env['product.product'].search([('website_published', '=', True), ('website_id', '=', request.website.id)])
-        product_ids = product_ids.with_context(warehouse=request.website.warehouse_id.id).filtered(lambda r: r.virtual_available > 0)
+        product_ids = product_ids.sudo().with_context(warehouse=request.website.warehouse_id.id).filtered(lambda r: r.virtual_available > 0)
         return expression.AND([domain, [('id', 'in', product_ids.ids)]])
