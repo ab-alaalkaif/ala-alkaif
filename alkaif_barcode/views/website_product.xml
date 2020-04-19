@@ -5,10 +5,10 @@
                 <div class="form-group">
                     <label for="uom_id">Unit of Measure</label>
                     <select class="form-control" id="uom_id" name="uom_id">
-                        <option t-att-value="product.uom_id.id"><span t-field="product.uom_id.name"/></option>
-                        <t t-set="barcode_ids" t-value="env['product.barcode'].search([('product_id', '=', product.id)])"/>
+                        <option t-att-value="product.sudo().uom_id.id"><span t-field="product.sudo().uom_id.name"/></option>
+                        <t t-set="barcode_ids" t-value="env['product.barcode'].sudo().search([('product_id', '=', product.id)])"/>
                         <t t-foreach="barcode_ids" t-as="barcode_id">
-                            <option t-att-value="barcode_id.product_uom_id.id"><span t-field="barcode_id.product_uom_id.name"/> (+ <t t-esc="barcode_id.unit_price - combination_info['price']"/>)</option>
+                            <option t-att-value="barcode_id.product_uom_id.id"><span t-field="barcode_id.sudo().product_uom_id.name"/> (+ <t t-esc="barcode_id.unit_price - combination_info['price']"/>)</option>
                         </t>
                     </select>
                 </div>
