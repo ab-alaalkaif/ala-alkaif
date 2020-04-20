@@ -1,4 +1,5 @@
 from odoo import api, fields, models, tools, _
+from odoo.tools import float_round
 
 
 class ProductBarcode(models.Model):
@@ -24,3 +25,23 @@ class ProductBarcode(models.Model):
         for barcode in self:
             product_id = barcode.product_template_id.product_variant_id
             barcode.available_in_pos = product_id.available_in_pos
+
+    def get_pricelist_price_website(self):
+        self.ensure_one()
+
+        current_website = self.env['website'].get_current_website()
+        pricelist = current_website.get_current_pricelist()
+        partner = self.env.user.partner_id
+        company_id = current_website.company_id
+        product = self.product_id
+
+        tax_display = self.env.user.has_group(
+            'account.group_show_line_subtotals_tax_excluded') and 'total_excluded' or 'total_included'
+        taxes = partner.property_account_position_id.map_tax(
+            product.sudo().taxes_id.filtered(lambda x: x.company_id == company_id), product, partner)
+
+        # The list_price is always the price of one.
+        quantity_1 = 1
+        price = taxes.compute_all(self.unit_price, pricelist.currency_id, quantity_1, product, partner)[tax_display]
+        return round(price, pricelist.currency_id.decimal_places)
+

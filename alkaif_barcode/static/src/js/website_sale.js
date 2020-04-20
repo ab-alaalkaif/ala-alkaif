@@ -12,7 +12,6 @@ odoo.define('alkaif_barcode.website_sale', function (require) {
         }),
         _onchange_uom: function (ev) {
             let select = $(ev.currentTarget)[0];
-            console.log(select);
             $('.oe_currency_value').text(select.options[select.selectedIndex].dataset.price);
         }
     })
