@@ -1,7 +1,17 @@
+from math import floor
+
 from odoo import api, fields, models, tools, _
+from odoo.addons.website_sale_stock.models.sale_order import SaleOrder
 
 
-class SaleOrder(models.Model):
+def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):
+    return super(SaleOrder, self)._cart_update(product_id, line_id, add_qty, set_qty, **kwargs)
+
+
+SaleOrder._cart_update = _cart_update
+
+
+class SaleOrderCustom(models.Model):
     _name = 'sale.order'
     _inherit = ['sale.order', 'barcodes.barcode_events_mixin']
 
@@ -41,14 +51,49 @@ class SaleOrder(models.Model):
             self.order_line.new(vals)
 
     def _cart_update(self, product_id=None, line_id=None, add_qty=0, set_qty=0, **kwargs):
-        res = super(SaleOrder, self)._cart_update(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs)
-        sale_line_id = self.env['sale.order.line'].browse(res.get('line_id'))
+        values = super(SaleOrderCustom, self)._cart_update(product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs)
+        sale_line_id = self.env['sale.order.line'].browse(values.get('line_id'))
         if sale_line_id.exists() and sale_line_id.barcode_id:
             sale_line_id.write({
                 'product_uom': sale_line_id.barcode_id.product_uom_id.id,
                 'price_unit': sale_line_id.barcode_id.unit_price
             })
-        return res
+        elif sale_line_id.exists() and kwargs.get('uom_id', False):
+            barcode_id = self.env['product.barcode'].search([('product_id', '=', sale_line_id.product_id.id),
+                                                             ('product_uom_id', '=', int(kwargs.get('uom_id', False)))
+                                                             ])
+            sale_line_id.write({
+                'product_uom': barcode_id.product_uom_id.id,
+                'price_unit': barcode_id.unit_price,
+                'barcode_id': barcode_id.id,
+                'barcode': barcode_id.name
+            })
+        # odoo.addons.website_sale_stock.models.sale_order._cart_update
+        line_id = values.get('line_id')
+
+        for line in self.order_line:
+            if line.product_id.type == 'product' and line.product_id.inventory_availability in ['always', 'threshold']:
+                cart_qty = 0
+                old_qty = line.product_uom_qty
+                for order_line in self.order_line.filtered(lambda p: p.product_id.id == line.product_id.id):
+                    cart_qty += order_line.product_uom_qty * order_line.product_uom.factor_inv
+                warehouse = self.website_id.warehouse_id if self.website_id else self.warehouse_id
+                if cart_qty > line.product_id.with_context(warehouse=warehouse.id).virtual_available and line_id == line.id:
+                    qty = line.product_id.with_context(warehouse=warehouse.id).virtual_available - cart_qty
+                    if line.barcode_id:
+                        qty = floor(qty / line.barcode_id.product_uom_id.factor_inv)
+                    new_val = super(SaleOrderCustom, self)._cart_update(line.product_id.id, line.id, qty, 0, **kwargs)
+                    values.update(new_val)
+
+                    # Make sure line still exists, it may have been deleted in super()_cartupdate because qty can be <= 0
+                    if line.exists() and new_val['quantity']:
+                        line.warning_stock = _('You ask for %s products but only %s is available') % (old_qty, new_val['quantity'])
+                        values['warning'] = line.warning_stock
+                    else:
+                        self.warning_stock = _("Some products became unavailable and your cart has been updated. We're sorry for the inconvenience.")
+                        values['warning'] = self.warning_stock
+        # end of patch
+        return values
 
     def _cart_find_product_line(self, product_id=None, line_id=None, **kwargs):
         lines = super()._cart_find_product_line(product_id, line_id, **kwargs)
