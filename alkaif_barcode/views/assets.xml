@@ -8,6 +8,9 @@
         </template>
 
         <template id="assets_frontend" inherit_id="website.assets_frontend">
+            <xpath expr="//script[@src='/website_sale/static/src/js/variant_mixin.js']" position="after">
+                <script type="text/javascript" src="/alkaif_barcode/static/src/js/variant_mixin.js"></script>
+            </xpath>
             <xpath expr="." position="inside">
                 <script type="text/javascript" src="/alkaif_barcode/static/src/js/website_sale.js"></script>
             </xpath>
