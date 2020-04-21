@@ -61,7 +61,7 @@ class SaleOrderCustom(models.Model):
         elif sale_line_id.exists() and kwargs.get('uom_id', False):
             barcode_id = self.env['product.barcode'].search([('product_id', '=', sale_line_id.product_id.id),
                                                              ('product_uom_id', '=', int(kwargs.get('uom_id', False)))
-                                                             ])
+                                                             ], limit=1)
             sale_line_id.write({
                 'product_uom': barcode_id.product_uom_id.id,
                 'price_unit': barcode_id.unit_price,

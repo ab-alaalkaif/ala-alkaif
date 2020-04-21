@@ -34,7 +34,9 @@ class WebsiteSaleCustom(WebsiteSale):
 
         if kw.get('uom_id', False):
             line = request.env['sale.order.line'].browse(vals.get('line_id'))
-            barcode_id = request.env['product.barcode'].sudo().search([('product_id', '=', int(product_id)), ('product_uom_id', '=', int(kw.get('uom_id', False)))])
+            barcode_id = request.env['product.barcode'].sudo().search([('product_id', '=', int(product_id)),
+                                                                       ('product_uom_id', '=', int(kw.get('uom_id', False)))
+                                                                       ], limit=1)
             if line.exists() and barcode_id:
                 line.sudo().write({
                     'product_uom': int(kw.get('uom_id', False)),
