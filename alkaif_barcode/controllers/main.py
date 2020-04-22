@@ -49,3 +49,17 @@ class WebsiteSaleCustom(WebsiteSale):
             return request.redirect("/shop/checkout?express=1")
 
         return request.redirect("/shop/cart")
+
+    @http.route(['/shop/address'], type='http', methods=['GET', 'POST'], auth="public", website=True, sitemap=False)
+    def address(self, **kw):
+        if not kw.get('country', False):
+            kw.update({
+                'country_id': str(request.env['res.country'].search([('code', '=', 'SA')]).id)
+            })
+        return super().address(**kw)
+
+    def checkout_form_validate(self, mode, all_form_values, data):
+        error, error_message = super().checkout_form_validate(mode, all_form_values, data)
+        error.pop('email', None)  # remove email key is it exists
+        error.pop('city', None)  # remove city key is it exists
+        return error, error_message
