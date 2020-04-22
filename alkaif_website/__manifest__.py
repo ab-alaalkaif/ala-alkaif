@@ -1,6 +1,6 @@
 {
     'name': 'Alkaif Website',
-    'version': '1.0.123',
+    'version': '1.0.126',
     'category': 'Sales',
     'sequence': 1,
     'depends': ['base', 'website', 'website_sale'],
@@ -8,6 +8,7 @@
 Alkaif Website
     """,
     'data': [
+        # views
 
     ],
     'installable': True,

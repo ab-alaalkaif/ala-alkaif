@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates id="alkaif_barcode.template" inherit_id="point_of_sale.template">
+    <t t-extend="Orderline">
+        <t t-jquery=".info-list" t-operation="append">
+            <t t-id="line.get_product().barcode">
+                 <li class="info">
+                     Barcode: <t t-esc="line.get_product().barcode"/>
+                 </li>
+            </t>
+        </t>
+    </t>
+</templates>

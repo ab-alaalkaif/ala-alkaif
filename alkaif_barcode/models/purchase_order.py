@@ -12,14 +12,14 @@ class PurchaseOrder(models.Model):
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
             sol = self.order_line.filtered(lambda r: r.barcode_id.id == barcode_id.id)
-            self.create_purchase_order_line(company_rec, barcode_id.product_id, sol, barcode_id=barcode_id)
+            self.create_purchase_order_line(company_rec, barcode_id.product_id, sol, barcode, barcode=barcode_id)
         else:
             product_id = self.env['product.product'].search([('barcode', '=', barcode)])
             if product_id:
                 sol = self.order_line.filtered(lambda r: r.product_id.barcode == barcode)
                 self.create_purchase_order_line(company_rec, product_id, sol)
 
-    def create_purchase_order_line(self, company_rec, product_id, sol, barcode_id=False):
+    def create_purchase_order_line(self, company_rec, product_id, sol, barcode, barcode_id=False):
         if sol:
             sol[0].product_qty += 1
         else:
@@ -37,6 +37,7 @@ class PurchaseOrder(models.Model):
                 'product_uom': product_id.uom_id.id if not barcode_id else barcode_id.product_uom_id.id,
                 'product_qty': 1.0,
                 'order_id': self.id,
+                'barcode': barcode,
                 'taxes_id': [(6, 0, taxes_ids)],
                 'date_planned': date.today()
             }
@@ -51,6 +52,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
     barcode_id = fields.Many2one('product.barcode')
+    barcode = fields.Char('Barcode used')
 
     @api.onchange('barcode_id')
     def _on_change_barcode(self):
@@ -64,3 +66,11 @@ class PurchaseOrderLine(models.Model):
                 'price_unit': self.barcode_id.unit_price,
                 'product_uom': self.barcode_id.product_uom_id,
             })
+
+    def _prepare_account_move_line(self, move):
+        res = super()._prepare_account_move_line(move)
+        if self.barcode:
+            res.update({
+                'barcode': self.barcode
+            })
+        return res

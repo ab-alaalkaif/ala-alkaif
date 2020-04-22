@@ -126,6 +126,7 @@ odoo.define('alkaif_barcode.models', function (require) {
         },
     });
 
+    var _super_orderline = models.Orderline.prototype;
     models.Orderline = models.Orderline.extend({
 
         get_product: function () {
@@ -140,7 +141,7 @@ odoo.define('alkaif_barcode.models', function (require) {
             this.barcode = barcode;
         },
         export_as_JSON: function () {
-            let result = this.constructor.__super__.export_as_JSON.apply(this, arguments);
+            let result = _super_orderline.export_as_JSON.call(this);
             result.product_uom_id = this.get_product().uom_id[0];
             return result;
         },
