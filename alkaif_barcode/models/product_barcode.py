@@ -1,5 +1,5 @@
 from odoo import api, fields, models, tools, _
-from odoo.tools import float_round
+from odoo.exceptions import UserError
 
 
 class ProductBarcode(models.Model):
@@ -14,6 +14,15 @@ class ProductBarcode(models.Model):
     unit_price = fields.Float()
     product_uom_id = fields.Many2one('uom.uom')
     available_in_pos = fields.Boolean(compute='_compute_available_in_pos', store=True)
+
+    @api.constrains('product_uom_id', 'name')
+    def _constrains_unique_pair_name_uom(self):
+        for barcode in self:
+            res = self.search([('product_template_id', '=', barcode.product_template_id.id),
+                               ('product_uom_id', '=', barcode.product_uom_id.id),
+                               ('id', '!=', barcode.id)])
+            if res:
+                raise UserError('You can not have two barcode for the same product and uom')
 
     @api.depends('product_template_id')
     def _compute_product_id(self):

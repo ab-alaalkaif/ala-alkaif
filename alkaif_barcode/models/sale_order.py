@@ -62,12 +62,13 @@ class SaleOrderCustom(models.Model):
             barcode_id = self.env['product.barcode'].search([('product_id', '=', sale_line_id.product_id.id),
                                                              ('product_uom_id', '=', int(kwargs.get('uom_id', False)))
                                                              ], limit=1)
-            sale_line_id.write({
-                'product_uom': barcode_id.product_uom_id.id,
-                'price_unit': barcode_id.unit_price,
-                'barcode_id': barcode_id.id,
-                'barcode': barcode_id.name
-            })
+            if barcode_id:
+                sale_line_id.write({
+                    'product_uom': barcode_id.product_uom_id.id,
+                    'price_unit': barcode_id.unit_price,
+                    'barcode_id': barcode_id.id,
+                    'barcode': barcode_id.name
+                })
         # odoo.addons.website_sale_stock.models.sale_order._cart_update
         line_id = values.get('line_id')
 
