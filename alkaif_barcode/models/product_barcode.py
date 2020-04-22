@@ -15,7 +15,7 @@ class ProductBarcode(models.Model):
     product_uom_id = fields.Many2one('uom.uom')
     available_in_pos = fields.Boolean(compute='_compute_available_in_pos', store=True)
 
-    @api.constrains('product_uom_id', 'name')
+    @api.constrains('product_uom_id', 'product_template_id')
     def _constrains_unique_pair_name_uom(self):
         for barcode in self:
             res = self.search([('product_template_id', '=', barcode.product_template_id.id),
