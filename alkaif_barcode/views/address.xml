@@ -1,14 +1,10 @@
 <odoo>
     <data>
         <template id="address" inherit_id="website_sale.address">
-            <xpath expr="//input[@name='zip']/.." position="replace">
-            </xpath>
-            <xpath expr="//input[@name='zip']/.." position="replace">
-            </xpath>
-            <xpath expr="//input[@name='city']/.." position="replace">
-            </xpath>
-            <xpath expr="//select[@name='country_id']/.." position="replace">
-            </xpath>
+            <xpath expr="//input[@name='zip']/.." position="replace"/>
+            <xpath expr="//input[@name='zip']/.." position="replace"/>
+            <xpath expr="//input[@name='city']/.." position="replace"/>
+            <xpath expr="//select[@name='country_id']/.." position="replace"/>
             <xpath expr="//label[@for='email']" position="attributes">
                 <attribute name="class" add="label-optional" separator=" "/>
             </xpath>
