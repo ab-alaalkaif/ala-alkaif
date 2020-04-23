@@ -12,12 +12,12 @@ class PurchaseOrder(models.Model):
         barcode_id = self.env['product.barcode'].search([('name', '=', barcode)])
         if barcode_id:
             sol = self.order_line.filtered(lambda r: r.barcode_id.id == barcode_id.id)
-            self.create_purchase_order_line(company_rec, barcode_id.product_id, sol, barcode, barcode=barcode_id)
+            self.create_purchase_order_line(company_rec, barcode_id.product_id, sol, barcode, barcode_id=barcode_id)
         else:
             product_id = self.env['product.product'].search([('barcode', '=', barcode)])
             if product_id:
                 sol = self.order_line.filtered(lambda r: r.product_id.barcode == barcode)
-                self.create_purchase_order_line(company_rec, product_id, sol)
+                self.create_purchase_order_line(company_rec, product_id, sol, barcode)
 
     def create_purchase_order_line(self, company_rec, product_id, sol, barcode, barcode_id=False):
         if sol:
