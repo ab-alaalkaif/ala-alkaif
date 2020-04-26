@@ -51,6 +51,8 @@ class ProductBarcode(models.Model):
 
         # The list_price is always the price of one.
         quantity_1 = 1
-        price = taxes.compute_all(self.unit_price, pricelist.currency_id, quantity_1, product, partner)[tax_display]
+        pricelisitem = pricelist.item_ids.filtered(lambda r: r.barcode_id == self and r.compute_price == 'fixed')
+        unit_price = pricelisitem.fixed_price if pricelisitem else self.unit_price
+        price = taxes.compute_all(unit_price, pricelist.currency_id, quantity_1, product, partner)[tax_display]
         return round(price, pricelist.currency_id.decimal_places)
 

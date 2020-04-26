@@ -9,4 +9,3 @@ class ProductPricelistItem(models.Model):
     @api.onchange('product_tmpl_id', 'applied_on')
     def onchange_product_tmpl_id(self):
         self.barcode_id = False
-
