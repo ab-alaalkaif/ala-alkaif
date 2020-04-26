@@ -110,7 +110,7 @@ class SaleOrderLine(models.Model):
     barcode = fields.Char('Barcode used')
 
     @api.onchange('barcode_id')
-    def _on_change_barcode(self):
+    def _on_change_barcode_id(self):
         if self.barcode_id:
             self.product_id = self.barcode_id.product_id
 
@@ -138,3 +138,27 @@ class SaleOrderLine(models.Model):
                 'barcode': self.barcode,
             })
         return res
+
+    @api.onchange('barcode')
+    def _onchange_barcode(self):
+        if not self.barcode:
+            return
+        barcode_id = self.env['product.barcode'].search([('name', '=', self.barcode)])
+        if barcode_id:
+            self.update_line(barcode_id.product_id, barcode_id=barcode_id)
+            self.barcode_id = barcode_id
+        else:
+            product_id = self.env['product.product'].search([('barcode', '=', self.barcode)])
+            if product_id:
+                self.update_line(product_id)
+
+    def update_line(self, product_id, barcode_id=False):
+        taxes = product_id.taxes_id
+        company_taxes = [tax_rec.id for tax_rec in taxes if tax_rec.company_id.id == self.company_id.id]
+        self.name = product_id.display_name
+        self.price_unit = product_id.list_price if not barcode_id else barcode_id.unit_price
+        self.discount = 0.0
+        self.product_id = product_id
+        self.product_uom = product_id.uom_id.id if not barcode_id else barcode_id.product_uom_id
+        self.product_uom_qty = 1.0
+        self.tax_id = [(6, 0, company_taxes)]
