@@ -40,7 +40,7 @@ class WebsiteSaleCustom(WebsiteSale):
             if line.exists() and barcode_id:
                 line.sudo().write({
                     'product_uom': int(kw.get('uom_id', False)),
-                    'price_unit': barcode_id.unit_price,
+                    'price_unit': barcode_id.get_pricelist_price_website(),
                     'barcode_id': barcode_id.id,
                     'barcode': barcode_id.name
                 })

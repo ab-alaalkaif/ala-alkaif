@@ -56,7 +56,7 @@ class SaleOrderCustom(models.Model):
         if sale_line_id.exists() and sale_line_id.barcode_id:
             sale_line_id.write({
                 'product_uom': sale_line_id.barcode_id.product_uom_id.id,
-                'price_unit': sale_line_id.barcode_id.unit_price
+                'price_unit': sale_line_id.barcode_id.get_pricelist_price_website()
             })
         elif sale_line_id.exists() and kwargs.get('uom_id', False):
             barcode_id = self.env['product.barcode'].search([('product_id', '=', sale_line_id.product_id.id),
@@ -65,7 +65,7 @@ class SaleOrderCustom(models.Model):
             if barcode_id:
                 sale_line_id.write({
                     'product_uom': barcode_id.product_uom_id.id,
-                    'price_unit': barcode_id.unit_price,
+                    'price_unit': barcode_id.get_pricelist_price_website(),
                     'barcode_id': barcode_id.id,
                     'barcode': barcode_id.name
                 })
