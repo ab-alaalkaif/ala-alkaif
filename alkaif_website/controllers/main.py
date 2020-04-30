@@ -9,7 +9,7 @@ class WebsiteSaleCustom(WebsiteSale):
         domain = super()._get_search_domain(search, category, attrib_values, search_in_description=search_in_description)
         if not request.website.warehouse_id:
             return domain
-        product_ids = request.env['product.product'].search([('website_published', '=', True), '|',
+        product_ids = request.env['product.template'].search([('website_published', '=', True), '|',
                                                              ('website_id', '=', request.website.id),
                                                              ('website_id', '=', False)
                                                              ])
