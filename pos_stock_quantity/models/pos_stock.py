@@ -32,6 +32,7 @@ class StockQuantity(models.Model):
             res.append(pick.id)
             self.location_traversal(queue, res, pick)
 
+    @api.model
     def create(self, vals):
         res = super(StockQuantity, self).create(vals)
         if res.location_id.usage == 'internal':

@@ -35,7 +35,7 @@ class ProductBarcode(models.Model):
             product_id = barcode.product_template_id.product_variant_id
             barcode.available_in_pos = product_id.available_in_pos
 
-    def get_pricelist_price_website(self):
+    def get_pricelist_price_website(self, compute_tax=False):
         self.ensure_one()
 
         current_website = self.env['website'].get_current_website()
@@ -51,6 +51,9 @@ class ProductBarcode(models.Model):
 
         # The list_price is always the price of one.
         quantity_1 = 1
-        price = taxes.compute_all(self.unit_price, pricelist.currency_id, quantity_1, product, partner)[tax_display]
+        pricelisitem = pricelist.item_ids.filtered(lambda r: r.barcode_id == self and r.compute_price == 'fixed')
+        price = pricelisitem.fixed_price if pricelisitem else self.unit_price
+        if compute_tax:
+            price = taxes.compute_all(price, pricelist.currency_id, quantity_1, product, partner)[tax_display]
         return round(price, pricelist.currency_id.decimal_places)
 

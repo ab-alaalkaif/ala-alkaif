@@ -7,7 +7,8 @@
             <field name="priority">99</field>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='order_line']/tree/field[@name='product_id']" position="before">
-                    <field name="barcode" readonly="1" force_save="1"/>
+                    <field name="barcode"/>
+                    <field name="barcode_id" invisible="1"/>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="_barcode_scanned" widget="barcode_handler" invisible="1"/>
