@@ -14,7 +14,9 @@ odoo.define('alkaif_barcode.models', function (require) {
         loaded: function (self, barcodes) {
             self.db.add_barcodes(barcodes);
         },
-    }]);
+    }], {
+        'after': "product.product"
+    });
 
     models.PosModel = models.PosModel.extend({
         scan_product: function (parsed_code) {
@@ -137,13 +139,28 @@ odoo.define('alkaif_barcode.models', function (require) {
                 return this.product;
             }
         },
+        // return the unit of measure of the product
+        get_unit: function(){
+            if(!this.uom_id){
+                return _super_orderline.get_unit.call(this);
+            }
+            return this.uom_id;
+        },
         set_barcode: function (barcode) {
             this.barcode = barcode;
         },
         export_as_JSON: function () {
             let result = _super_orderline.export_as_JSON.call(this);
-            result.product_uom_id = this.get_product().uom_id[0];
+            result.product_uom_id = this.get_unit().id;
+            result.barcode = this.barcode;
             return result;
+        },
+        init_from_JSON: function(json) {
+            _super_orderline.init_from_JSON.apply(this, arguments);
+            this.product = this.pos.db.product_by_barcode[json.barcode]
+            this.price = json.price_unit;
+            this.uom_id = this.pos.units_by_id[json.product_uom_id];
+            this.barcode = json.barcode;
         },
     });
 

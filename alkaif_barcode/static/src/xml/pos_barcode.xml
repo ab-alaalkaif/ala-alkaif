@@ -4,7 +4,7 @@
         <t t-jquery=".info-list" t-operation="append">
             <t t-id="line.get_product().barcode">
                  <li class="info">
-                     Barcode: <t t-esc="line.get_product().barcode"/>
+                     Barcode: <t t-esc="line.barcode"/>
                  </li>
             </t>
         </t>
