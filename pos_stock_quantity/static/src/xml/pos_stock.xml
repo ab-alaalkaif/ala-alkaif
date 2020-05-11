@@ -43,7 +43,7 @@
 
     <t t-extend="Orderline">
         <t t-jquery=".info em" t-operation="append">
-            (of <t t-esc="line.pos.db.get_stock(line.get_product().id).toFixed(2)"/>)
+            (of <t t-esc="line.get_current_stock()"/>)
         </t>
     </t>
 </templates>

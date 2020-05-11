@@ -8,7 +8,7 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
     var screens = require('point_of_sale.screens');
     var bus = require('bus.BusService');
     var rpc = require('web.rpc');
-    var PosDB = require('point_of_sale.DB');
+    var PosDB = require('pos_stock_quantity.db');
     var task;
 
     models.load_fields('product.product', ['type']);
@@ -165,7 +165,6 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
             $('.product-list').find('.qty-tag').each(function () {
                 var $product = $(this).parents('.product');
                 var id = parseInt($product.attr('data-product-id'));
-
                 var qty = self.db.get_stock(id);
 
                 if (qty === false) {
@@ -215,6 +214,13 @@ odoo.define('pos_stock_quantity.pos_stock', function (require) {
             if (this.pos.gui.current_screen) {
                 this.check_reminder();
             }
+        },
+        get_current_stock: function() {
+            let qty = this.pos.db.get_stock(this.get_product().id);
+            if (qty !== false) {
+                return qty.toFixed(2)
+            }
+            return qty
         },
         check_reminder: function () {
             var self = this;
