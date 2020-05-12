@@ -157,7 +157,7 @@ odoo.define('alkaif_barcode.models', function (require) {
         },
         init_from_JSON: function(json) {
             _super_orderline.init_from_JSON.apply(this, arguments);
-            if (this.pos.db.product_by_barcode[json.barcode] != undefined) {
+            if (this.pos.db.product_by_barcode[json.barcode] !== undefined) {
                 this.product = this.pos.db.product_by_barcode[json.barcode];
             }
             this.price = json.price_unit;
