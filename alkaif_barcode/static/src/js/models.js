@@ -157,7 +157,9 @@ odoo.define('alkaif_barcode.models', function (require) {
         },
         init_from_JSON: function(json) {
             _super_orderline.init_from_JSON.apply(this, arguments);
-            this.product = this.pos.db.product_by_barcode[json.barcode]
+            if (this.pos.db.product_by_barcode[json.barcode] != undefined) {
+                this.product = this.pos.db.product_by_barcode[json.barcode];
+            }
             this.price = json.price_unit;
             this.uom_id = this.pos.units_by_id[json.product_uom_id];
             this.barcode = json.barcode;
@@ -191,7 +193,7 @@ odoo.define('alkaif_barcode.models', function (require) {
                     (!item.categ_id || _.contains(category_ids, item.categ_id[0])) &&
                     (!item.date_start || moment(item.date_start).isSameOrBefore(date)) &&
                     (!item.date_end || moment(item.date_end).isSameOrAfter(date)) &&
-                    (!self.is_multi_barcode || item.barcode_id && item.barcode_id === self.barcode);
+                    (!self.is_multi_barcode && !item.barcode_id || item.barcode_id && item.barcode_id[1] === self.barcode);
             });
 
             var price = self.lst_price;
