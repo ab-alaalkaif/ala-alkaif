@@ -2,7 +2,7 @@ odoo.define('alkaif_barcode.models', function (require) {
     "use strict";
 
     var models = require('point_of_sale.models');
-    var PosDB = require('point_of_sale.DB');
+    var PosDB = require('pos_stock_quantity.db');
     var core = require('web.core');
 
     models.load_models([{
@@ -14,7 +14,9 @@ odoo.define('alkaif_barcode.models', function (require) {
         loaded: function (self, barcodes) {
             self.db.add_barcodes(barcodes);
         },
-    }]);
+    }], {
+        'after': "product.product"
+    });
 
     models.PosModel = models.PosModel.extend({
         scan_product: function (parsed_code) {
@@ -137,26 +139,107 @@ odoo.define('alkaif_barcode.models', function (require) {
                 return this.product;
             }
         },
+        // return the unit of measure of the product
+        get_unit: function(){
+            if(!this.uom_id){
+                return _super_orderline.get_unit.call(this);
+            }
+            return this.uom_id;
+        },
         set_barcode: function (barcode) {
             this.barcode = barcode;
         },
         export_as_JSON: function () {
             let result = _super_orderline.export_as_JSON.call(this);
-            result.product_uom_id = this.get_product().uom_id[0];
+            result.product_uom_id = this.get_unit().id;
+            result.barcode = this.barcode;
             return result;
+        },
+        init_from_JSON: function(json) {
+            _super_orderline.init_from_JSON.apply(this, arguments);
+            if (this.pos.db.product_by_barcode[json.barcode] !== undefined) {
+                this.product = this.pos.db.product_by_barcode[json.barcode];
+            }
+            this.price = json.price_unit;
+            this.uom_id = this.pos.units_by_id[json.product_uom_id];
+            this.barcode = json.barcode;
         },
     });
 
     models.Product = models.Product.extend({
         get_price: function (pricelist, quantity) {
-            const items = pricelist.items;
             var self = this;
-            for (var i = 0; i < items.length; i++) {
-                if (items[i].barcode_id && items[i].barcode_id[1] === self.barcode) {
-                    return items[i].fixed_price
-                }
+            var date = moment().startOf('day');
+
+            // In case of nested pricelists, it is necessary that all pricelists are made available in
+            // the POS. Display a basic alert to the user in this case.
+            if (pricelist === undefined) {
+                alert(_t(
+                    'An error occurred when loading product prices. ' +
+                    'Make sure all pricelists are available in the POS.'
+                ));
             }
-            return this.constructor.__super__.get_price.apply(this, arguments);
+
+            var category_ids = [];
+            var category = this.categ;
+            while (category) {
+                category_ids.push(category.id);
+                category = category.parent;
+            }
+
+            var pricelist_items = _.filter(pricelist.items, function (item) {
+                return (!item.product_tmpl_id || item.product_tmpl_id[0] === self.product_tmpl_id) &&
+                    (!item.product_id || item.product_id[0] === self.id) &&
+                    (!item.categ_id || _.contains(category_ids, item.categ_id[0])) &&
+                    (!item.date_start || moment(item.date_start).isSameOrBefore(date)) &&
+                    (!item.date_end || moment(item.date_end).isSameOrAfter(date)) &&
+                    (!self.is_multi_barcode && !item.barcode_id || item.barcode_id && item.barcode_id[1] === self.barcode);
+            });
+
+            var price = self.lst_price;
+            _.find(pricelist_items, function (rule) {
+                if (rule.min_quantity && quantity < rule.min_quantity) {
+                    return false;
+                }
+
+                if (rule.base === 'pricelist') {
+                    price = self.get_price(rule.base_pricelist, quantity);
+                } else if (rule.base === 'standard_price') {
+                    price = self.standard_price;
+                }
+
+                if (rule.compute_price === 'fixed') {
+                    price = rule.fixed_price;
+                    return true;
+                } else if (rule.compute_price === 'percentage') {
+                    price = price - (price * (rule.percent_price / 100));
+                    return true;
+                } else {
+                    var price_limit = price;
+                    price = price - (price * (rule.price_discount / 100));
+                    if (rule.price_round) {
+                        price = round_pr(price, rule.price_round);
+                    }
+                    if (rule.price_surcharge) {
+                        price += rule.price_surcharge;
+                    }
+                    if (rule.price_min_margin) {
+                        price = Math.max(price, price_limit + rule.price_min_margin);
+                    }
+                    if (rule.price_max_margin) {
+                        price = Math.min(price, price_limit + rule.price_max_margin);
+                    }
+                    return true;
+                }
+
+                return false;
+            });
+
+            // This return value has to be rounded with round_di before
+            // being used further. Note that this cannot happen here,
+            // because it would cause inconsistencies with the backend for
+            // pricelist that have base == 'pricelist'.
+            return price;
         },
     });
 
