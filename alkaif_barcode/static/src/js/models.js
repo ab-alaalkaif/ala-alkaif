@@ -2,7 +2,7 @@ odoo.define('alkaif_barcode.models', function (require) {
     "use strict";
 
     var models = require('point_of_sale.models');
-    var PosDB = require('pos_stock_quantity.db');
+    var PosDB = require('point_of_sale.DB');
     var core = require('web.core');
 
     models.load_models([{
